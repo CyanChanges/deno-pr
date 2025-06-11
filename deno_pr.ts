@@ -42,7 +42,10 @@ if (import.meta.main) {
     } else if (args.pr !== false) {
       const pr_number = +args._["0"];
       consola.debug("Fetching PR %s", pr_number);
-      const { head: { sha } } = await getPR(pr_number);
+      const { head: { sha }, title, draft, user } = await getPR(pr_number);
+      consola.info("[PR] Title    %s", title);
+      consola.info("[PR] User     %s (%s)", user.login, user.url);
+      consola.info("[PR] Is Draft %o", draft ?? '<unknown>');
       return [sha, pr_number];
     } else {
       console.error("Unresolve args", args);
@@ -50,11 +53,12 @@ if (import.meta.main) {
     }
   })();
 
-  consola.box(
-    `Commit SHA:   %s
-Event Number: %s`,
-    sha,
-    num || "<none?",
+  consola.debug(
+    `Commit SHA:   %s`,
+    sha
+  )
+  consola.debug(`Event Number: %s`,
+    num || "<none>",
   );
   consola.info("Fetching Workflows with %s", sha);
   const run = await getArtifactRunBySha(sha);
