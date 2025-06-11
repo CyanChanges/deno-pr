@@ -1,0 +1,17 @@
+{
+  "name": "@cyans/deno-pr",
+  "version": "0.1.0",
+  "tasks": {
+    "dev": "deno run --watch main.ts"
+  },
+  "exports": "./deno_pr.ts",
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1",
+    "@std/bytes": "jsr:@std/bytes@^1.0.6",
+    "@std/cli": "jsr:@std/cli@^1.0.19",
+    "@std/crypto": "jsr:@std/crypto@^1.0.5",
+    "@std/encoding": "jsr:@std/encoding@^1.0.10",
+    "arktype": "npm:arktype@^2.1.20",
+    "octokit": "npm:octokit@^5.0.3"
+  }
+}
