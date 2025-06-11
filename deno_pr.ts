@@ -103,6 +103,7 @@ if (import.meta.main) {
       {
         type: "text",
         default: artName,
+        initial: artName,
       },
     );
     const file = await Deno.open(filePath, {
