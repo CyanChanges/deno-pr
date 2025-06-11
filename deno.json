@@ -1,8 +1,17 @@
 {
   "name": "@cyans/deno-pr",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "tasks": {
     "dev": "deno run --watch main.ts"
+  },
+  "publish": {
+    "include": [
+      "LICENSE",
+      "README.md",
+      "deno.json",
+      "*.ts"
+    ],
+    "exclude": [".idea"]
   },
   "exports": "./deno_pr.ts",
   "imports": {
