@@ -1,4 +1,3 @@
-import kit from "./kit.ts";
 import { parseArgs } from "@std/cli/parse-args";
 import { type } from "arktype";
 import {
@@ -16,8 +15,8 @@ import { concat } from "@std/bytes/concat";
 export * from "./func.ts";
 
 export const Args = type({
-  "pr": "boolean = true",
-  "commit?": "boolean",
+  "pr?": "boolean | number",
+  "commit?": "boolean | string",
   "target?": "string",
   "_": "(string | number)[]",
 });
@@ -32,15 +31,15 @@ if (import.meta.main) {
   if (args.pr && args.commit) {
     throw new TypeError("`--pr` and `--commit` cannot exists together");
   }
-  if (args._.length != 1) {
+  if (typeof args.commit !== 'string' && typeof args.pr !== 'number' && args._.length != 1) {
     throw new Error("Require a position argument for pr number or commit sha");
   }
 
   const [sha, num] = await (async function () {
     if (args.commit) {
-      return [`${args._["0"]}`, void 0];
+      return [typeof args.commit === 'string' ? args.commit : `${args._["0"]}`, void 0];
     } else if (args.pr !== false) {
-      const pr_number = +args._["0"];
+      const pr_number = typeof args.pr === 'string' ? args.pr : +args._["0"];
       consola.debug("Fetching PR %s", pr_number);
       const { head: { sha }, title, draft, user } = await getPR(pr_number);
       consola.info("[PR] Title    %s", title);
@@ -60,14 +59,14 @@ if (import.meta.main) {
   consola.debug(`Event Number: %s`,
     num || "<none>",
   );
-  consola.info("Fetching Workflows with %s", sha);
+  consola.info("Fetching Workflows associated with commit %s", sha);
   const run = await getArtifactRunBySha(sha);
   if (!run) throw new Error(`Could not found ci run for commit ${sha}`);
   const { id: run_id } = run;
   const artName = artifactName(target, num);
-  consola.info(`Search for Artifact with name: ${artName}`);
+  consola.info(`Predict Artifact Name: ${artName}`);
 
-  consola.debug("Fetching Artifacts with Run %s", run_id);
+  consola.start("Fetching Artifacts in Workflow Run %s", run_id);
   const { artifacts } = await getArtifacts(run_id);
   let match = false;
   for (const artifact of artifacts) {
@@ -80,7 +79,7 @@ if (import.meta.main) {
     consola.info(`Archive Size:      ${artifact.size_in_bytes}`);
     consola.info(`Archive Digest:    ${artifact.digest || "<none>"}`);
 
-    const download = await consola.prompt("Do you want to download", {
+    const download = await consola.prompt("Do you want to download (require fine-grained GITHUB_TOKEN with 'actions')", {
       type: "confirm",
     });
     if (!download) break;
